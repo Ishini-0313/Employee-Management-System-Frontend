@@ -1,11 +1,14 @@
-import React, { useState } from 'react'
-import { createEmployee } from '../services/EmployeeService';
+import React, { useEffect, useState } from 'react'
+import { createEmployee, getEmployee, updateEmployee } from '../services/EmployeeService';
 import { useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 export default function Employee() {
   const [firstName, setFirstName] =  useState("")
   const [lastName, setLastName] = useState("")
   const [email, setEmail] = useState("")
+
+  const {id} = useParams();
 
   const [errors , setErrors] = useState({
     firstName:"",
@@ -15,17 +18,50 @@ export default function Employee() {
 
   const navigator = useNavigate();
 
-  function saveEmployee(e){
+  useEffect(()=>{
+    if(id){
+        getEmployee(id).
+            then((response)=>{
+                setFirstName(response.data.firstName);
+                setLastName(response.data.lastName);
+                setEmail(response.data.email);
+            }).catch(
+                error => {
+                    console.error(error);
+                }
+            )
+    }
+  },[id])
+
+  function saveOrUpdateEmployee(e){
     e.preventDefault();
 
     if(validateForm()){
+
         const employee = {firstName, lastName, email}
         console.log(employee);
 
-        createEmployee(employee).then((response)=>{
-            console.log(response.data);
-            navigator("/employees");
-        })
+        if(id){
+            updateEmployee(id, employee).then(
+                (response)=>{console.log(response.data);
+                    navigator("/employees");
+                }
+            ).catch(
+                error => {
+                    console.error(error);
+                }
+            )
+        }
+        else{
+            createEmployee(employee).then((response)=>{
+                console.log(response.data);
+                navigator("/employees");
+            }).catch(
+                error => {
+                    console.error(error);
+                }
+            )
+        }
     }
   }
 
@@ -63,12 +99,30 @@ export default function Employee() {
     return valid;
   }
 
+  function pageTitle(){
+    if(id){
+        return <h2 className='text-center'>Update Employee</h2>
+    }else{
+        return <h2 className='text-center'>Add Employee</h2>
+    }
+  }
+
+  function btnType(){
+    if(id){
+        return <button className='btn btn-success' onClick={saveOrUpdateEmployee}>Update</button>
+    }else{
+        return <button className='btn btn-success' onClick={saveOrUpdateEmployee}>Submit</button>
+    }
+  }
+
   return (
     <div className='container'>
         <br />
         <div className='row'>
             <div className='card col-md-6 offset-md-3 offset-md-3'>
-                <h2 className='text-center'>Add Employee</h2>
+                {
+                    pageTitle()
+                }
                 <div className='card-body'>
                     <form>
                         <div className='form-group mb-2'>
@@ -89,7 +143,7 @@ export default function Employee() {
                             {errors.email && <div className='invalid-feedback'>{errors.email}</div>}
                         </div>
 
-                        <button className='btn btn-success' onClick={saveEmployee}>Submit</button>
+                        {btnType()}
                     </form>
                 </div>
             </div>

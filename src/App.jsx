@@ -19,6 +19,9 @@ function App() {
 
             {/* http://localhost:5173/add-employee */}
             <Route path='/add-employee' element={<Employee/>}></Route>
+
+            {/* http://localhost:5173/edit-employee/1 */}
+            <Route path='/edit-employee/:id' element={<Employee/>}></Route>
           </Routes>
         <Footer/>
       </BrowserRouter>
