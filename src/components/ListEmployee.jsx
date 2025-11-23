@@ -1,7 +1,7 @@
 import React from 'react'
 import { useState } from 'react'
 import { useEffect } from 'react';
-import { listEmployees } from '../services/EmployeeService';
+import { deleteEmployee, listEmployees } from '../services/EmployeeService';
 import { useNavigate } from 'react-router-dom';
 
 export default function ListEmployee() {
@@ -12,12 +12,34 @@ export default function ListEmployee() {
 
     useEffect(
         ()=>{
-            listEmployees().then((response)=>{setEmployees(response.data)}).catch(error => {console.error(error)})
+            getAllEmployees();
         },[]
     )
 
+    function getAllEmployees(){
+        listEmployees().then(
+            (response)=>{setEmployees(response.data)}
+        ).catch(
+            error => {console.error(error)}
+        )
+    }
+
     function updateEmployee(id){
         navigator(`/edit-employee/${id}`);
+    }
+
+    function removeEmployee(id){
+        console.log(id);
+
+        deleteEmployee(id).then(
+            (response) => {
+                getAllEmployees();
+            }
+        ).catch(
+            error => {
+                console.error(error)
+            }
+        )
     }
 
     return (
@@ -42,7 +64,10 @@ export default function ListEmployee() {
                                 <td>{employee.firstName}</td>
                                 <td>{employee.lastName}</td>
                                 <td>{employee.email}</td>
-                                <td className=''><button className='btn btn-info' onClick={()=>updateEmployee(employee.id)}>Update</button></td>
+                                <td className=''>
+                                    <button className='btn btn-info mx-2' onClick={()=>updateEmployee(employee.id)}>Update</button>
+                                    <button className='btn btn-danger' onClick={()=>removeEmployee(employee.id)}>Delete</button>
+                                </td>
                             </tr>
                         )
                     }
